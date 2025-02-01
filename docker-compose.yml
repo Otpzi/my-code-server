@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   vscode-server:
     container_name: my-code-server
-    image: my-code-server
+    image: msft-code-server:latest
     ports:
       - "8585:8585"
     #store the data in the host (optional : uncomment the volumes section and change the path)
@@ -13,10 +11,38 @@ services:
     #optional : add the network
     networks:
       - vscode-server-network
+      
+  caddy-proxy:
+    container_name: caddy-proxy
+    image: caddy:latest
+    restart: always
+    ports:
+      - "4437:443"
+      - "807:80"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./ssl:/etc/caddy/ssl
+    networks:
+      - vscode-server-network
+    environment:
+      - CADDY_AUTO_TLS=off
+    entrypoint: >
+      /bin/sh -c "
+      echo 'as5402t-d94a.myhome.lan {
+        tls internal
+        reverse_proxy vscode-server:8585
+        file_server
+      }' > /etc/caddy/Caddyfile &&
+      cat /etc/caddy/Caddyfile &&
+      caddy run --config /etc/caddy/Caddyfile
+      "
 
-#optional : add the network 
+volumes:
+  caddy_data:
+  caddy_config:
+
 networks:
   vscode-server-network:
     external: false
     name: vscode-server-network
-

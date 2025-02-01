@@ -2,7 +2,7 @@
 FROM ubuntu:latest
 
 # Set the root password for the IDE system
-RUN echo 'root:<root_password>' | chpasswd
+RUN echo 'root:<CHANGE PASSWORD>' | chpasswd
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y software-properties-common apt-transport-https wget
@@ -26,6 +26,8 @@ RUN apt-get -y install sudo -y \
 
 # Create a non-root user
 RUN useradd -m vscodeuser
+RUN echo "vscodeuser	ALL=(ALL:ALL) ALL" >> /etc/sudoers
+RUN echo "vscodeuser	ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Switch to the non-root user
 USER vscodeuser
@@ -37,4 +39,4 @@ ENV HOME /home/vscodeuser
 EXPOSE 8585
 
 # Start Visual Studio Code on port 8585 from anywhere (0.0.0.0)
-CMD ["code", "serve-web", "--host", "0.0.0.0", "--port", "8585", "--user-data-dir", "/home/vscodeuser", "--connection-token", "<token_to_define>"]
+CMD ["code", "serve-web", "--host", "0.0.0.0", "--port", "8585", "--user-data-dir", "/home/vscodeuser", "--connection-token", "<change me token>"]
